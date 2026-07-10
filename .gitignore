@@ -1,0 +1,22 @@
+# Claude Code — 个人本地文件（不提交到团队仓库）
+CLAUDE.local.md
+.claude/settings.local.json
+
+# IDE
+.idea/
+.vscode/settings.json
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# 旧版 Plugin 残留（迁移到项目级 .claude/ 后不需要）
+/.claude-plugin/
+/hooks/
+/settings.json
+/updateCLAUDE.md
+/skills/
+/agents/

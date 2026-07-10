@@ -1,0 +1,137 @@
+{
+  "outputStyle": "Proactive",
+  "includeCoAuthoredBy": true,
+  "effortLevel": "high",
+  "thinking": true,
+  "autoCompact": true,
+  "checkpoints": true,
+  "progressBar": true,
+  "language": "zh",
+
+  "extraKnownMarketplaces": {
+    "Kelisiyounger": {
+      "source": {
+        "source": "github",
+        "repo": "Kelisiyounger/Team-plugin"
+      }
+    }
+  },
+
+  "permissions": {
+    "allow": [
+      "Bash(npm test)",
+      "Bash(npm run test:*)",
+      "Bash(npm run build)",
+      "Bash(npm run dev)",
+      "Bash(npm run lint)",
+      "Bash(npm run format)",
+      "Bash(npx tsc --noEmit)",
+      "Bash(npx prisma *)",
+      "Bash(npx eslint *)",
+      "Bash(npx prettier *)",
+      "Bash(git status)",
+      "Bash(git diff *)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(git log *)",
+      "Bash(git branch *)",
+      "Bash(docker compose ps)",
+      "Bash(docker compose logs *)",
+      "Bash(scripts/sync-claude-md.sh *)",
+      "Bash(scripts/check-version.sh *)"
+    ],
+    "deny": [
+      "Bash(git push --force origin main)",
+      "Bash(git push --force origin master)",
+      "Bash(git reset --hard *)",
+      "Bash(rm -rf *)",
+      "Bash(docker rm -f *)",
+      "Bash(docker system prune *)"
+    ]
+  },
+
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo \"[Claude Code] $(date '+%H:%M:%S') 写入文件: ${CLAUDE_TOOL_INPUT_FILE_PATH}\""
+          }
+        ]
+      },
+      {
+        "matcher": "Bash(git commit *)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "npx lint-staged 2>/dev/null || true"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash(npm test*)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "test -d node_modules || npm install"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write(.*\\.java$)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd ${CLAUDE_PROJECT_DIR} && ./gradlew spotlessApply -q 2>/dev/null || true"
+          }
+        ]
+      },
+      {
+        "matcher": "Write(.*\\.tsx?$)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "npx prettier --write \"${CLAUDE_TOOL_INPUT_FILE_PATH}\" 2>/dev/null || true"
+          },
+          {
+            "type": "command",
+            "command": "npx eslint --fix \"${CLAUDE_TOOL_INPUT_FILE_PATH}\" 2>/dev/null || true"
+          }
+        ]
+      },
+      {
+        "matcher": "Write(.*\\.(css|scss|less)$)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "npx prettier --write \"${CLAUDE_TOOL_INPUT_FILE_PATH}\" 2>/dev/null || true"
+          }
+        ]
+      },
+      {
+        "matcher": "Write(.*\\.(json|md|ya?ml)$)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "npx prettier --write \"${CLAUDE_TOOL_INPUT_FILE_PATH}\" 2>/dev/null || true"
+          }
+        ]
+      }
+    ],
+    "Notification": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "powershell -Command \"Add-Type -AssemblyName System.Windows.Forms; [System.Windows.Forms.MessageBox]::Show('Claude Code 任务已完成', '城际云 DevTools', 'OK', 'Information')\" 2>/dev/null || true"
+          }
+        ]
+      }
+    ]
+  }
+}
